@@ -6,21 +6,23 @@
     <title>Escáner de SKU con Cámara</title>
     <script src="https://unpkg.com/@zxing/browser@latest"></script>
     <style>
-        /* Basic styling for video and overlay */
+        /* Estilos básicos para el contenedor de video */
         #videoContainer {
             position: relative;
             width: 100%;
             max-width: 600px;
             margin: auto;
+            margin-top: 20px;
         }
 
+        /* Estilo para el video en sí */
         #video {
             width: 100%;
             height: auto;
             background: black;
         }
 
-        /* Scanner overlay */
+        /* Overlay para el escáner */
         #scannerOverlay {
             position: absolute;
             top: 0;
@@ -31,9 +33,10 @@
             justify-content: center;
             align-items: center;
             border: 2px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
         }
 
-        /* Horizontal scanning line */
+        /* Línea de escaneo */
         #scannerOverlay::before {
             content: "";
             width: 80%;
@@ -43,12 +46,13 @@
             animation: scan 1.5s infinite alternate;
         }
 
-        /* Keyframes for the scanning line animation */
+        /* Keyframes para animación de la línea de escaneo */
         @keyframes scan {
             from { top: 25%; }
             to { top: 75%; }
         }
 
+        /* Resultado del SKU */
         #skuResult {
             font-size: 1.2em;
             color: green;
@@ -72,7 +76,7 @@
         let isScanning = false;
 
         async function iniciarEscaneo() {
-            // Stop any ongoing scanning session
+            // Detener cualquier sesión de escaneo anterior
             if (isScanning) {
                 codeReader.reset();
                 skuResult.textContent = "";
@@ -81,21 +85,21 @@
             }
             isScanning = true;
 
-            // Configure video stream with rear camera
+            // Configura el lector de código para usar la cámara trasera
             try {
                 const videoElement = document.getElementById("video");
 
-                // Start the barcode scanner with specific facing mode
-                codeReader.decodeFromVideoDevice(undefined, videoElement, (result, err) => {
+                // Inicia el escaneo de código de barras
+                codeReader.decodeFromVideoDevice(null, videoElement, (result, err) => {
                     if (result) {
-                        // Barcode successfully detected
+                        // Código de barras detectado
                         const sku = result.text;
                         skuResult.textContent = `SKU Detectado: ${sku}`;
 
-                        // Redirect to the URL with the SKU as a query parameter
+                        // Redirigir a la URL con el SKU como parámetro de búsqueda
                         window.location.href = `https://dameunbeso.com/search/?q=${encodeURIComponent(sku)}`;
 
-                        // Stop scanning after successful detection
+                        // Detener el escaneo después de la detección exitosa
                         codeReader.reset();
                         isScanning = false;
                     } else if (err && !(err instanceof ZXing.NotFoundException)) {
@@ -103,7 +107,7 @@
                     }
                 });
 
-                // Configure video constraints
+                // Configurar video con la cámara trasera
                 await navigator.mediaDevices.getUserMedia({
                     video: { 
                         facingMode: { ideal: "environment" },
@@ -119,4 +123,3 @@
     </script>
 </body>
 </html>
-
