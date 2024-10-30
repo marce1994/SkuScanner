@@ -85,7 +85,6 @@
             }
             isScanning = true;
 
-            // Configura el lector de código para usar la cámara trasera
             try {
                 const videoElement = document.getElementById("video");
 
@@ -103,7 +102,7 @@
                         codeReader.reset();
                         isScanning = false;
                     } else if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.error(err);
+                        alert(`Error de escaneo: ${err.message || err}`);
                     }
                 });
 
@@ -116,8 +115,9 @@
                     }
                 });
             } catch (error) {
-                console.error("Error al iniciar la cámara:", error);
+                alert(`Error al iniciar la cámara: ${error.message || error}`);
                 skuResult.textContent = "Error al iniciar la cámara.";
+                isScanning = false;
             }
         }
     </script>
