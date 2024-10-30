@@ -37,7 +37,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: none;
         }
 
         #overlay {
@@ -46,7 +45,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
             border: 2px solid rgba(255, 255, 255, 0.5);
@@ -111,10 +110,9 @@
             // Ocultar título y botón, mostrar video y overlay
             document.getElementById("title").classList.add("hidden");
             document.getElementById("startButton").classList.add("hidden");
-            document.getElementById("video").style.display = "block";
-            document.getElementById("overlay").style.display = "flex";
+            document.getElementById("skuResult").textContent = ""; // Limpiar resultado anterior
 
-            // Inicia Quagga para escanear el código de barras
+            // Configuración de Quagga
             Quagga.init({
                 inputStream: {
                     name: "Live",
@@ -122,8 +120,9 @@
                     target: document.querySelector('#video')
                 },
                 decoder: {
-                    readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader", "i2of5_reader", "codabar_reader"]
-                }
+                    readers: ["code_128_reader"]
+                },
+                locate: true
             }, function(err) {
                 if (err) {
                     console.error(err);
@@ -138,19 +137,18 @@
                 const sku = result.codeResult.code;
                 document.getElementById("skuResult").textContent = `SKU Detectado: ${sku}`;
                 
-                // Redirecciona a la URL con el SKU como parámetro de búsqueda
+                // Redirigir a la URL con el SKU como parámetro de búsqueda
                 window.location.href = `https://dameunbeso.com.ar/search/?q=${sku.substring(0,6)}`;
 
-                // Detiene Quagga después de detectar un código
+                // Detener Quagga después de detectar un código
                 Quagga.stop();
 
                 // Mostrar título y botón nuevamente, ocultar video y overlay
                 document.getElementById("title").classList.remove("hidden");
                 document.getElementById("startButton").classList.remove("hidden");
-                document.getElementById("video").style.display = "none";
-                document.getElementById("overlay").style.display = "none";
             });
         }
     </script>
 </body>
 </html>
+
