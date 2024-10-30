@@ -139,7 +139,7 @@
                 document.getElementById("skuResult").textContent = `SKU Detectado: ${sku}`;
                 
                 // Redirecciona a la URL con el SKU como parámetro de búsqueda
-                window.location.href = `https://dameunbeso.com/search/?q=${encodeURIComponent(sku)}`;
+                window.location.href = `https://dameunbeso.com.ar/search/?q=${sku.substring(0,6)}`;
 
                 // Detiene Quagga después de detectar un código
                 Quagga.stop();
