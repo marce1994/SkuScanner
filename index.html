@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner de SKU con Cámara</title>
+    <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+    <style>
+        #video {
+            width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+        #skuResult {
+            font-size: 1.2em;
+            color: green;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Escáner de SKU con Cámara</h1>
+    <button onclick="iniciarEscaneo()">Iniciar Escaneo</button>
+    <div id="video"></div>
+    <div id="skuResult"></div>
+
+    <script>
+        function iniciarEscaneo() {
+            // Inicia Quagga para escanear el código de barras
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#video') // Div para mostrar el video
+                },
+                decoder: {
+                    readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // Tipos de códigos de barras
+                }
+            }, function(err) {
+                if (err) {
+                    console.error(err);
+                    alert("Error al iniciar la cámara.");
+                    return;
+                }
+                Quagga.start();
+            });
+
+            // Escucha los resultados del escaneo
+            Quagga.onDetected(function(result) {
+                const sku = result.codeResult.code;
+                document.getElementById("skuResult").textContent = `SKU Detectado: ${sku}`;
+                
+                // Redirecciona a la URL con el SKU como parámetro de búsqueda
+                window.location.href = `https://dameunbeso.com/search/?q=${encodeURIComponent(sku)}`;
+
+                // Detiene Quagga después de detectar un código
+                Quagga.stop();
+            });
+        }
+    </script>
+</body>
+</html>
