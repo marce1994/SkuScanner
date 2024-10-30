@@ -1,196 +1,122 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escáner de SKU con Cámara</title>
-    <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+    <script src="https://unpkg.com/@zxing/browser@latest"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        h1 {
-            color: #333;
-        }
-        #cameraSelect, #startButton {
-            margin: 10px;
-            padding: 10px;
-            font-size: 16px;
-        }
+        /* Basic styling for video and overlay */
         #videoContainer {
             position: relative;
             width: 100%;
             max-width: 600px;
-            margin-top: 20px;
-            border-radius: 8px;
-            overflow: hidden;
+            margin: auto;
         }
+
         #video {
             width: 100%;
             height: auto;
-            background-color: #000;
+            background: black;
         }
-        #overlay {
+
+        /* Scanner overlay */
+        #scannerOverlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             display: flex;
-            align-items: center;
             justify-content: center;
-            pointer-events: none;
+            align-items: center;
+            border: 2px solid rgba(255, 255, 255, 0.5);
         }
-        #overlay::before {
+
+        /* Horizontal scanning line */
+        #scannerOverlay::before {
             content: "";
-            width: 80%;
-            height: 60%;
-            border: 2px solid rgba(255, 0, 0, 0.5);
-            box-sizing: border-box;
-        }
-        #overlay .line {
-            position: absolute;
             width: 80%;
             height: 2px;
             background-color: rgba(255, 0, 0, 0.7);
-            animation: scan 2s linear infinite;
+            position: absolute;
+            animation: scan 1.5s infinite alternate;
         }
+
+        /* Keyframes for the scanning line animation */
         @keyframes scan {
-            0% { top: 20%; }
-            100% { top: 80%; }
+            from { top: 25%; }
+            to { top: 75%; }
         }
+
         #skuResult {
             font-size: 1.2em;
             color: green;
             margin-top: 20px;
-            display: none;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <h1>Escáner de SKU con Cámara</h1>
-    <select id="cameraSelect"></select>
-    <button id="startButton" onclick="iniciarEscaneo()">Iniciar Escaneo</button>
+    <button onclick="iniciarEscaneo()">Iniciar Escaneo</button>
     <div id="videoContainer">
-        <video id="video" autoplay></video>
-        <div id="overlay">
-            <div class="line"></div>
-        </div>
+        <video id="video" autoplay muted playsinline></video>
+        <div id="scannerOverlay"></div>
     </div>
     <div id="skuResult"></div>
 
     <script>
-        const videoElement = document.getElementById('video');
-        const cameraSelect = document.getElementById('cameraSelect');
-        const skuResult = document.getElementById('skuResult');
-        const startButton = document.getElementById('startButton');
-        
-        async function listarCamaras() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            
-            videoDevices.forEach((device, index) => {
-                const option = document.createElement('option');
-                option.value = device.deviceId;
-                option.text = device.label || `Cámara ${index + 1}`;
-                cameraSelect.appendChild(option);
-            });
-        }
+        const codeReader = new ZXing.BrowserMultiFormatReader();
+        const skuResult = document.getElementById("skuResult");
+        let isScanning = false;
 
         async function iniciarEscaneo() {
-            const selectedDeviceId = cameraSelect.value;
+            // Stop any ongoing scanning session
+            if (isScanning) {
+                codeReader.reset();
+                skuResult.textContent = "";
+                isScanning = false;
+                return;
+            }
+            isScanning = true;
 
-            cameraSelect.style.display = 'none';
-            startButton.style.display = 'none';
-            skuResult.style.display = 'none';
+            // Configure video stream with rear camera
+            try {
+                const videoElement = document.getElementById("video");
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { 
-                    deviceId: { exact: selectedDeviceId },
-                    width: { ideal: 1280 }, // Try setting lower resolution like 1280x720
-                    height: { ideal: 720 }
-                }
-            });
+                // Start the barcode scanner with specific facing mode
+                codeReader.decodeFromVideoDevice(undefined, videoElement, (result, err) => {
+                    if (result) {
+                        // Barcode successfully detected
+                        const sku = result.text;
+                        skuResult.textContent = `SKU Detectado: ${sku}`;
 
-            videoElement.srcObject = stream;
+                        // Redirect to the URL with the SKU as a query parameter
+                        window.location.href = `https://dameunbeso.com/search/?q=${encodeURIComponent(sku)}`;
 
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: videoElement
-                },
-                decoder: {
-                    readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
-                },
-                locate: true, // Improves accuracy by locating the barcode in the image
-                locator: {
-                    patchSize: "medium", // Small, medium, or large - choose based on your needs
-                    halfSample: true
-                }
-            }, function(err) {
-                if (err) {
-                    console.error(err);
-                    alert("Error al iniciar la cámara.");
-                    return;
-                }
-                Quagga.start();
-            });
-
-            Quagga.onProcessed(function(result) {
-                const drawingCtx = Quagga.canvas.ctx.overlay;
-                const drawingCanvas = Quagga.canvas.dom.overlay;
-
-                if (result) {
-                    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-                    if (result.boxes) {
-                        result.boxes.filter(function (box) {
-                            return box !== result.box;
-                        }).forEach(function (box) {
-                            Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, {
-                                color: "green",
-                                lineWidth: 2
-                            });
-                        });
+                        // Stop scanning after successful detection
+                        codeReader.reset();
+                        isScanning = false;
+                    } else if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.error(err);
                     }
+                });
 
-                    if (result.box) {
-                        Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, {
-                            color: "#00F",
-                            lineWidth: 2
-                        });
+                // Configure video constraints
+                await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: { ideal: "environment" },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
                     }
-
-                    if (result.codeResult && result.codeResult.code) {
-                        Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, {
-                            color: 'red',
-                            lineWidth: 3
-                        });
-                    }
-                }
-            });
-
-            Quagga.onDetected(function(result) {
-                const sku = result.codeResult.code;
-                skuResult.textContent = `SKU Detectado: ${sku}`;
-                skuResult.style.display = 'block';
-                
-                window.location.href = `https://dameunbeso.com/search/?q=${encodeURIComponent(sku)}`;
-
-                Quagga.stop();
-                stream.getTracks().forEach(track => track.stop());
-            });
+                });
+            } catch (error) {
+                console.error("Error al iniciar la cámara:", error);
+                skuResult.textContent = "Error al iniciar la cámara.";
+            }
         }
-
-        listarCamaras();
     </script>
 </body>
 </html>
+
