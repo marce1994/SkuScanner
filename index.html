@@ -120,8 +120,8 @@
             document.getElementById("startButton").classList.add("hidden");
             document.getElementById("skuResult").textContent = ""; // Limpiar resultado anterior
             document.getElementById("debugInfo").textContent = ""; // Limpiar debug anterior
-
-            // Configuración de Quagga
+            
+            // Configuración de Quagga con ajustes de precisión
             Quagga.init({
                 inputStream: {
                     name: "Live",
@@ -132,9 +132,26 @@
                     readers: ["code_128_reader"]
                 },
                 locate: true,
-                numOfWorkers: navigator.hardwareConcurrency, // Optimización de rendimiento
-                frequency: 10, // Aumenta la precisión al reducir la velocidad de detección
-                halfSample: true // Reduce el tamaño de la imagen para mejorar el rendimiento
+                locator: {
+                    halfSample: true,
+                    patchSize: "medium", // Aumentar precisión (opciones: x-small, small, medium, large, x-large)
+                    debug: {
+                        showCanvas: true,
+                        showPatches: true,
+                        showFoundPatches: true,
+                        showSkeleton: true,
+                        showLabels: true,
+                        showPatchLabels: true,
+                        showRemainingPatchLabels: true,
+                        boxFromPatches: {
+                            showTransformed: true,
+                            showTransformedBox: true,
+                            showBB: true
+                        }
+                    }
+                },
+                numOfWorkers: 4, // Mayor procesamiento paralelo
+                // frequency: 10 // Reducir frecuencia para evitar detecciones constantes de basura
             }, function(err) {
                 if (err) {
                     console.error(err);
@@ -143,7 +160,7 @@
                 }
                 Quagga.start();
             });
-
+            
             // Escucha los resultados del escaneo
             Quagga.onDetected(function(result) {
                 const sku = result.codeResult.code;
