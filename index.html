@@ -135,17 +135,26 @@
             // Escucha los resultados del escaneo
             Quagga.onDetected(function(result) {
                 const sku = result.codeResult.code;
-                document.getElementById("skuResult").textContent = `SKU Detectado: ${sku}`;
                 
-                // Redirigir a la URL con el SKU como parámetro de búsqueda
-                window.location.href = `https://dameunbeso.com.ar/search/?q=${encodeURIComponent(sku.substring(0,6))}`;
+                // Expresión regular para buscar el patrón de dos letras seguidas de cinco dígitos
+                const pattern = /[A-Z]{2}\d{5}/;
+                const match = sku.match(pattern);
 
-                // Detener Quagga después de detectar un código
-                Quagga.stop();
+                // Si se encuentra un código válido, lo extrae y ejecuta el código deseado
+                if (match) {
+                    const codigoSKU = match[0];
+                    document.getElementById("skuResult").textContent = `SKU Detectado: ${codigoSKU}`;
 
-                // Mostrar título y botón nuevamente, ocultar video y overlay
-                document.getElementById("title").classList.remove("hidden");
-                document.getElementById("startButton").classList.remove("hidden");
+                    // Redirigir a la URL con el SKU como parámetro de búsqueda
+                    window.location.href = `https://dameunbeso.com.ar/search/?q=${encodeURIComponent(codigoSKU)}`;
+
+                    // Detener Quagga después de detectar un código válido
+                    Quagga.stop();
+
+                    // Mostrar título y botón nuevamente, ocultar video y overlay
+                    document.getElementById("title").classList.remove("hidden");
+                    document.getElementById("startButton").classList.remove("hidden");
+                }
             });
         }
     </script>
