@@ -74,6 +74,13 @@
             text-align: center;
         }
 
+        #debugInfo {
+            font-size: 1em;
+            color: #333;
+            margin-top: 10px;
+            text-align: center;
+        }
+
         button {
             padding: 10px 20px;
             font-size: 1em;
@@ -104,6 +111,7 @@
     </div>
     
     <div id="skuResult"></div>
+    <div id="debugInfo"></div> <!-- Contenedor para la información de depuración -->
 
     <script>
         function iniciarEscaneo() {
@@ -111,6 +119,7 @@
             document.getElementById("title").classList.add("hidden");
             document.getElementById("startButton").classList.add("hidden");
             document.getElementById("skuResult").textContent = ""; // Limpiar resultado anterior
+            document.getElementById("debugInfo").textContent = ""; // Limpiar debug anterior
 
             // Configuración de Quagga
             Quagga.init({
@@ -136,6 +145,9 @@
             Quagga.onDetected(function(result) {
                 const sku = result.codeResult.code;
                 
+                // Mostrar el código detectado en tiempo real
+                document.getElementById("debugInfo").textContent = `Código detectado: ${sku}`;
+
                 // Expresión regular para buscar el patrón de dos letras seguidas de cinco dígitos
                 const pattern = /[A-Z]{2}\d{5}/;
                 const match = sku.match(pattern);
