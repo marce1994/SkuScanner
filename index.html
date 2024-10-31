@@ -131,7 +131,10 @@
                 decoder: {
                     readers: ["code_128_reader"]
                 },
-                locate: true
+                locate: true,
+                numOfWorkers: navigator.hardwareConcurrency, // Optimización de rendimiento
+                frequency: 10, // Aumenta la precisión al reducir la velocidad de detección
+                halfSample: true // Reduce el tamaño de la imagen para mejorar el rendimiento
             }, function(err) {
                 if (err) {
                     console.error(err);
@@ -149,7 +152,7 @@
                 document.getElementById("debugInfo").textContent = `Código detectado: ${sku}`;
 
                 // Expresión regular para buscar el patrón de dos letras seguidas de cinco dígitos
-                const pattern = /[A-Z]{2}\d{5}/;
+                const pattern = /\b[A-Z]{2}\d{5}\b/;
                 const match = sku.match(pattern);
 
                 // Si se encuentra un código válido, lo extrae y ejecuta el código deseado
