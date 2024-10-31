@@ -120,7 +120,7 @@
                     target: document.querySelector('#video')
                 },
                 decoder: {
-                    readers: ["code_39_reader", "code_128_reader"]
+                    readers: ["code_128_reader"]
                 },
                 locate: true
             }, function(err) {
@@ -138,7 +138,7 @@
                 document.getElementById("skuResult").textContent = `SKU Detectado: ${sku}`;
                 
                 // Redirigir a la URL con el SKU como parámetro de búsqueda
-                window.location.href = `https://dameunbeso.com.ar/search/?q=${sku.substring(0,6)}`;
+                window.location.href = `https://dameunbeso.com.ar/search/?q=${encodeURIComponent(sku.substring(0,6))}`;
 
                 // Detener Quagga después de detectar un código
                 Quagga.stop();
