@@ -1,0 +1,13 @@
+{
+	"scripts": {
+		"dev": "npx tailwindcss -i ./src/input.css -o ./src/output.css --watch",
+		"start": "npx tailwindcss -i ./src/input.css -o ./src/output.css && node server.js"
+	},
+	"devDependencies": {
+		"tailwindcss": "^3.4.14"
+	},
+	"dependencies": {
+		"cors-anywhere": "^0.4.4",
+		"express": "^4.21.1"
+	}
+}
