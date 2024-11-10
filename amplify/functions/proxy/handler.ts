@@ -6,7 +6,7 @@ const proxy = cors_proxy.createServer({
     removeHeaders: ['cookie', 'cookie2']
 });
 
-exports.handler = async (event: any) => {
+export const handler = async (event: any) => {
     return new Promise((resolve) => {
         // Extracción de la URL objetivo del evento
         const targetUrl = event.queryStringParameters?.url || '';
