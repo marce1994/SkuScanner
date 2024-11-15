@@ -26,7 +26,7 @@ export default function Home() {
     const targetElement = doc.querySelector(".product-grid a");
 
     if (targetElement) {
-      // @ts-ignore
+      // @ts-expect-error href is vanilla html element property
       const url = targetElement.href;
       setIframeUrl(url);
       setShowHtml(true);

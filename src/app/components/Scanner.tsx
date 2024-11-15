@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-// @ts-ignore
+// @ts-expect-error this library doesnt have typings
 import Quagga from 'quagga';
 
 interface ScannerProps {
@@ -26,7 +26,7 @@ const Scanner: React.FC<ScannerProps> = ({ onHtmlLoad }) => {
           },
           locate: true,
         },
-        (err: any) => {
+        (err: Error) => {
           if (err) {
             console.error(err);
             alert('Error al iniciar la cámara.');
@@ -37,7 +37,7 @@ const Scanner: React.FC<ScannerProps> = ({ onHtmlLoad }) => {
         }
       );
 
-      Quagga.onDetected(async (result: any) => {
+      Quagga.onDetected(async (result: { codeResult: { code: string; }; }) => {
         const sku = result.codeResult.code;
         setSkuResult(sku);
         const pattern = /\b[A-Z]{2}\d{5}\b/;
