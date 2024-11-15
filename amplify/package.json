@@ -1,6 +1,8 @@
 {
 	"type": "module",
 	"dependencies": {
-		"cors-anywhere": "^0.4.4"
+		"cors-anywhere": "^0.4.4",
+		"aws-cdk-lib": "^2.38.0",
+        "constructs": "^10.0.0"
 	}
 }
