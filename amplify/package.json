@@ -1,5 +1,5 @@
 {
-  "type": "module",
+	"type": "module",
 	"dependencies": {
 		"cors-anywhere": "^0.4.4"
 	}
